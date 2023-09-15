@@ -51,7 +51,7 @@ namespace WavenGSI
                     Player = PlayerInfos,
                     World = WorldInfos
                 });
-            // Log.LogInfo(playerInfosSerialized);
+            Log.LogInfo(playerInfosSerialized);
             using StringContent jsonContent = new(
                 playerInfosSerialized, 
                 Encoding.UTF8, 

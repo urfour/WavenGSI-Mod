@@ -2,8 +2,10 @@
 using Ankama.Cube.Fight;
 using Ankama.Cube.Fight.Entities;
 using Ankama.Cube.Player;
-using Ankama.Cube.States;
+using Ankama.Cube.UI.Fight;
+using Channel;
 using System.Collections.Generic;
+using System.Reflection;
 using WavenGSI.Player;
 
 namespace WavenGSI
@@ -23,8 +25,11 @@ namespace WavenGSI
         public int ReservePoints { get; set; }
         public int BaseMovementPoints { get; set; }
         public int MovementPoints { get; set; }
+        public ElementPoints ElementPoints { get; set; }
         public int SpellsCount { get; set; }
         public SpellSlots Spells { get; set; }
+        public CompanionSlots Companions { get; set; }
+        public int CompanionsCount { get; set; }
 
         public PlayerInfos() {}
 
@@ -76,6 +81,22 @@ namespace WavenGSI
                         Spells.Slot6 = spells[5];
                     if (SpellsCount >= 7)
                         Spells.Slot7 = spells[6];
+                    Companions = new CompanionSlots();
+                    CompanionsCount = player.m_availableCompanions.Count;
+                    PropertyInfo[] rootProperties = typeof(CompanionSlots).GetProperties();
+                    for (var i = 0; i < CompanionsCount; i++)
+                    {
+                        Companion newCompanion = new Companion();
+                        newCompanion.Name = player.m_availableCompanions[i].definition.displayName;
+                        newCompanion.Element = player.m_availableCompanions[i].definition.GetElement().Value.ToString();
+                        newCompanion.State = player.m_availableCompanions[i].state.ToString();
+                        rootProperties[i].SetValue(Companions, newCompanion);
+                    }
+                    ElementPoints = new ElementPoints();
+                    //ElementPoints.FirePoints = player.heroStatus.GetCarac(CaracId.FirePoints);
+                    //ElementPoints.WaterPoints = player.heroStatus.GetCarac(CaracId.WaterPoints);
+                    //ElementPoints.EarthPoints = player.heroStatus.GetCarac(CaracId.EarthPoints);
+                    //ElementPoints.AirPoints = player.heroStatus.GetCarac(CaracId.AirPoints);
                 }
                 else
                 {
@@ -85,3 +106,4 @@ namespace WavenGSI
         }
     }
 }
+
