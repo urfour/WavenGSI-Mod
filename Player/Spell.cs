@@ -11,6 +11,7 @@ namespace WavenGSI.Player
         public string Name { get; set; }
         public string Element { get; set; }
         public int Cost { get; set; }
+        public bool IsAvailable { get; set; }
 
         public Spell() { }
     }

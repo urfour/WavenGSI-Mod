@@ -25,7 +25,6 @@ namespace WavenGSI
         public int ReservePoints { get; set; }
         public int BaseMovementPoints { get; set; }
         public int MovementPoints { get; set; }
-        public ElementPoints ElementPoints { get; set; }
         public int SpellsCount { get; set; }
         public SpellSlots Spells { get; set; }
         public CompanionSlots Companions { get; set; }
@@ -38,33 +37,35 @@ namespace WavenGSI
             if (PlayerData.initialized)
             {
                 AccountName = PlayerData.instance.nickName.Nickname;
-                HeroName = PlayerData.instance.heroCollectionData.currentPlayerHero.name;
-                Class = PlayerData.instance.heroCollectionData.currentPlayerHero.god.ToString();
-                Weapon = PlayerData.instance.heroCollectionData.currentPlayerHero.weaponDefinition.displayName.Split
-                    (
-                        PlayerData.instance.heroCollectionData.currentPlayerHero.god.ToString().ToUpper() + " - "
-                    )[1];
-                Level = PlayerData.instance.heroCollectionData.currentPlayerHero.level;
+                var currentHero = PlayerData.instance.heroCollectionData.currentPlayerHero;
+                HeroName = currentHero.name;
+                Class = currentHero.god.ToString();
+                Weapon = currentHero.weaponDefinition.displayName.Split(Class.ToUpper() + " - ")[1];
+                Level = currentHero.level;
                 if (GameStatus.isInFight)
                 {
-                    IsInFight = true;
-                    IsPlayerTurn = FightStatus.local.currentTurnPlayerId == FightStatus.local.GetLocalPlayer().id;
                     PlayerStatus player = FightStatus.local.GetLocalPlayer();
+                    LocalPlayerHUD playerHUD = FightUI.instance.GetLocalPlayerHUD();
+                    IsInFight = true;
+                    IsPlayerTurn = FightStatus.local.currentTurnPlayerId == player.id;
                     BaseHealthPoints = player.heroStatus.baseLife;
                     HealthPoints = player.heroStatus.life;
                     ActionPoints = player.actionPoints;
                     ReservePoints = player.reservePoints;
                     BaseMovementPoints = player.heroStatus.baseMovementPoints;
                     MovementPoints = player.heroStatus.movementPoints;
-                    SpellsCount = FightStatus.local.GetLocalPlayer().m_spells.Count;
+                    SpellsCount = player.m_spells.Count;
                     Spells = new SpellSlots();
                     var spells = new List<Spell>();
-                    foreach (var spell in FightStatus.local.GetLocalPlayer().m_spells)
+                    for (int i = 0; i < player.m_spells.Count; i++)
                     {
                         Spell newSpell = new Spell();
-                        newSpell.Name = spell.Value.spellDefinition.displayName.Split(" - ")[3];
-                        newSpell.Element = spell.Value.spellDefinition.details.element.ToString();
-                        newSpell.Cost = spell.Value.baseCost.Value;
+                        newSpell.Name = player.m_spells[i].spellDefinition.displayName;
+                        newSpell.Element = player.m_spells[i].spellDefinition.details.element.ToString();
+                        //if (playerHUD.m_spellBar.isActiveAndEnabled && playerHUD.GetSpellAtIndex(i) != null)
+                        //{
+                        //    newSpell.IsAvailable = playerHUD.GetSpellAtIndex(i).Value.canBeCast;
+                        //}
                         spells.Add(newSpell);
                     }
                     if (SpellsCount >= 1)
@@ -90,13 +91,10 @@ namespace WavenGSI
                         newCompanion.Name = player.m_availableCompanions[i].definition.displayName;
                         newCompanion.Element = player.m_availableCompanions[i].definition.GetElement().Value.ToString();
                         newCompanion.State = player.m_availableCompanions[i].state.ToString();
+                        if (playerHUD.GetCompanionAtIndex(i) != null)
+                            newCompanion.IsAvailable = playerHUD.GetCompanionAtIndex(i).Value.canBeCast;
                         rootProperties[i].SetValue(Companions, newCompanion);
                     }
-                    ElementPoints = new ElementPoints();
-                    //ElementPoints.FirePoints = player.heroStatus.GetCarac(CaracId.FirePoints);
-                    //ElementPoints.WaterPoints = player.heroStatus.GetCarac(CaracId.WaterPoints);
-                    //ElementPoints.EarthPoints = player.heroStatus.GetCarac(CaracId.EarthPoints);
-                    //ElementPoints.AirPoints = player.heroStatus.GetCarac(CaracId.AirPoints);
                 }
                 else
                 {
@@ -106,4 +104,3 @@ namespace WavenGSI
         }
     }
 }
-
