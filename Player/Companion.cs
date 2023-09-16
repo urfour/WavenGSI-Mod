@@ -11,6 +11,7 @@ namespace WavenGSI.Player
         public string Name { get; set; }
         public string Element { get; set; }
         public string State { get; set; }
+        public string Rarity { get; set; }
         public bool IsAvailable { get; set; }
         public Companion() { }
     }

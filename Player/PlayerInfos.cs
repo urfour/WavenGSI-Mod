@@ -30,7 +30,7 @@ namespace WavenGSI
         public CompanionSlots Companions { get; set; }
         public int CompanionsCount { get; set; }
 
-        public PlayerInfos() {}
+        public PlayerInfos() { }
 
         public void Update()
         {
@@ -44,56 +44,60 @@ namespace WavenGSI
                 Level = currentHero.level;
                 if (GameStatus.isInFight)
                 {
-                    PlayerStatus player = FightStatus.local.GetLocalPlayer();
-                    LocalPlayerHUD playerHUD = FightUI.instance.GetLocalPlayerHUD();
-                    IsInFight = true;
-                    IsPlayerTurn = FightStatus.local.currentTurnPlayerId == player.id;
-                    BaseHealthPoints = player.heroStatus.baseLife;
-                    HealthPoints = player.heroStatus.life;
-                    ActionPoints = player.actionPoints;
-                    ReservePoints = player.reservePoints;
-                    BaseMovementPoints = player.heroStatus.baseMovementPoints;
-                    MovementPoints = player.heroStatus.movementPoints;
-                    SpellsCount = player.m_spells.Count;
-                    Spells = new SpellSlots();
-                    var spells = new List<Spell>();
-                    for (int i = 0; i < player.m_spells.Count; i++)
+                    if (FightStatus.local != null)
                     {
-                        Spell newSpell = new Spell();
-                        newSpell.Name = player.m_spells[i].spellDefinition.displayName;
-                        newSpell.Element = player.m_spells[i].spellDefinition.details.element.ToString();
-                        //if (playerHUD.m_spellBar.isActiveAndEnabled && playerHUD.GetSpellAtIndex(i) != null)
-                        //{
-                        //    newSpell.IsAvailable = playerHUD.GetSpellAtIndex(i).Value.canBeCast;
-                        //}
-                        spells.Add(newSpell);
-                    }
-                    if (SpellsCount >= 1)
-                        Spells.Slot1 = spells[0];
-                    if (SpellsCount >= 2)
-                        Spells.Slot2 = spells[1];
-                    if (SpellsCount >= 3)
-                        Spells.Slot3 = spells[2];
-                    if (SpellsCount >= 4)
-                        Spells.Slot4 = spells[3];
-                    if (SpellsCount >= 5)
-                        Spells.Slot5 = spells[4];
-                    if (SpellsCount >= 6)
-                        Spells.Slot6 = spells[5];
-                    if (SpellsCount >= 7)
-                        Spells.Slot7 = spells[6];
-                    Companions = new CompanionSlots();
-                    CompanionsCount = player.m_availableCompanions.Count;
-                    PropertyInfo[] rootProperties = typeof(CompanionSlots).GetProperties();
-                    for (var i = 0; i < CompanionsCount; i++)
-                    {
-                        Companion newCompanion = new Companion();
-                        newCompanion.Name = player.m_availableCompanions[i].definition.displayName;
-                        newCompanion.Element = player.m_availableCompanions[i].definition.GetElement().Value.ToString();
-                        newCompanion.State = player.m_availableCompanions[i].state.ToString();
-                        if (playerHUD.GetCompanionAtIndex(i) != null)
-                            newCompanion.IsAvailable = playerHUD.GetCompanionAtIndex(i).Value.canBeCast;
-                        rootProperties[i].SetValue(Companions, newCompanion);
+                        PlayerStatus player = FightStatus.local.GetLocalPlayer();
+                        LocalPlayerHUD playerHUD = FightUI.instance.GetLocalPlayerHUD();
+                        if (player != null)
+                        {
+                            IsInFight = true;
+                            IsPlayerTurn = FightStatus.local.currentTurnPlayerId == player.id;
+                            BaseHealthPoints = player.heroStatus.baseLife;
+                            HealthPoints = player.heroStatus.life;
+                            ActionPoints = player.actionPoints;
+                            ReservePoints = player.reservePoints;
+                            BaseMovementPoints = player.heroStatus.baseMovementPoints;
+                            MovementPoints = player.heroStatus.movementPoints;
+                            Spells = new SpellSlots();
+                            PropertyInfo[] spellProperties = typeof(SpellSlots).GetProperties();
+                            int spellCount = 0;
+                            foreach (var spell in player.m_spells.Values)
+                            {
+                                if (spell.location == SpellMovementZone.Hand)
+                                {
+                                    Spell newSpell = new Spell
+                                    {
+                                        Name = spell.spellDefinition.displayName,
+                                        Element = spell.spellDefinition.details.element.ToString(),
+                                        Cost = spell.baseCost.Value,
+                                        IsAvailable = IsPlayerTurn && spell.baseCost.Value <= ActionPoints
+                                    };
+                                    spellProperties[spellCount].SetValue(Spells, newSpell);
+                                    spellCount++;
+                                }
+                            }
+                            SpellsCount = spellCount;
+                            for (; spellCount < SpellsCount; spellCount++)
+                            {
+                                spellProperties[spellCount].SetValue(Spells, null);
+                            }
+                            Companions = new CompanionSlots();
+                            CompanionsCount = player.m_availableCompanions.Count;
+                            PropertyInfo[] companionProperties = typeof(CompanionSlots).GetProperties();
+                            for (var i = 0; i < CompanionsCount; i++)
+                            {
+                                Companion newCompanion = new Companion
+                                {
+                                    Name = player.m_availableCompanions[i].definition.displayName,
+                                    Element = player.m_availableCompanions[i].definition.GetElement().Value.ToString(),
+                                    State = player.m_availableCompanions[i].state.ToString(),
+                                    Rarity = player.m_availableCompanions[i].definition.rarity.ToString()
+                                };
+                                if (IsPlayerTurn && playerHUD.GetCompanionAtIndex(i) != null)
+                                    newCompanion.IsAvailable = playerHUD.GetCompanionAtIndex(i).Value.canBeCast;
+                                companionProperties[i].SetValue(Companions, newCompanion);
+                            }
+                        }
                     }
                 }
                 else
