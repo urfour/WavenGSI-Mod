@@ -1,14 +1,8 @@
-﻿using Ankama.Cube.Data;
-using Ankama.Cube.Fight;
-using Ankama.Cube.Fight.Entities;
-using Ankama.Cube.Player;
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Timers;
@@ -35,7 +29,7 @@ namespace WavenGSI
             client.BaseAddress = new Uri(baseAddress);
             Timer timer = new Timer();
             timer.AutoReset = true;
-            timer.Interval = 1000;
+            timer.Interval = 500;
             timer.Elapsed += (s, e) => SendInfos();
             timer.Start();
 
@@ -51,7 +45,7 @@ namespace WavenGSI
                     Player = PlayerInfos,
                     World = WorldInfos
                 });
-            // Log.LogInfo(playerInfosSerialized);
+            //Log.LogInfo(playerInfosSerialized);
             using StringContent jsonContent = new(
                 playerInfosSerialized, 
                 Encoding.UTF8, 

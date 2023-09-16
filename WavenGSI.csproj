@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>WavenGSI</AssemblyName>
-    <Description>My first plugin</Description>
-    <Version>1.0.0</Version>
+    <Description>BepInEx mod for Game State Integration in Waven</Description>
+    <Version>1.1.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
@@ -15,31 +15,28 @@
 
   <ItemGroup>
     <Reference Include="Ankama.Cube">
-      <HintPath>..\..\..\..\AppData\Local\Ankama\Waven\BepInEx\interop\Ankama.Cube.dll</HintPath>
+      <HintPath>..\..\..\..\..\AppData\Local\Ankama\Waven\BepInEx\interop\Ankama.Cube.dll</HintPath>
     </Reference>
     <Reference Include="Ankama.DataManager">
-      <HintPath>..\..\..\..\AppData\Local\Ankama\Waven\BepInEx\interop\Ankama.DataManager.dll</HintPath>
+      <HintPath>..\..\..\..\..\AppData\Local\Ankama\Waven\BepInEx\interop\Ankama.DataManager.dll</HintPath>
     </Reference>
     <Reference Include="Ankama.LevelManagement">
-      <HintPath>..\..\..\..\AppData\Local\Ankama\Waven\BepInEx\interop\Ankama.LevelManagement.dll</HintPath>
+      <HintPath>..\..\..\..\..\AppData\Local\Ankama\Waven\BepInEx\interop\Ankama.LevelManagement.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx.Core">
-      <HintPath>..\..\..\..\AppData\Local\Ankama\Waven\BepInEx\core\BepInEx.Core.dll</HintPath>
+      <HintPath>..\..\..\..\..\AppData\Local\Ankama\Waven\BepInEx\core\BepInEx.Core.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx.Unity.IL2CPP">
-      <HintPath>..\..\..\..\AppData\Local\Ankama\Waven\BepInEx\core\BepInEx.Unity.IL2CPP.dll</HintPath>
+      <HintPath>..\..\..\..\..\AppData\Local\Ankama\Waven\BepInEx\core\BepInEx.Unity.IL2CPP.dll</HintPath>
     </Reference>
     <Reference Include="Il2CppInterop.Runtime">
-      <HintPath>..\..\..\..\AppData\Local\Ankama\Waven\BepInEx\core\Il2CppInterop.Runtime.dll</HintPath>
+      <HintPath>..\..\..\..\..\AppData\Local\Ankama\Waven\BepInEx\core\Il2CppInterop.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Il2Cppmscorlib">
-      <HintPath>..\..\..\..\AppData\Local\Ankama\Waven\BepInEx\interop\Il2Cppmscorlib.dll</HintPath>
-    </Reference>
-    <Reference Include="Il2CppSystem">
-      <HintPath>..\..\..\..\AppData\Local\Ankama\Waven\BepInEx\interop\Il2CppSystem.dll</HintPath>
+      <HintPath>..\..\..\..\..\AppData\Local\Ankama\Waven\BepInEx\interop\Il2Cppmscorlib.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\..\AppData\Local\Ankama\Waven\BepInEx\interop\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\AppData\Local\Ankama\Waven\BepInEx\unity-libs\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

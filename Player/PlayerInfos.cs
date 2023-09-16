@@ -2,8 +2,10 @@
 using Ankama.Cube.Fight;
 using Ankama.Cube.Fight.Entities;
 using Ankama.Cube.Player;
-using Ankama.Cube.States;
+using Ankama.Cube.UI.Fight;
+using Channel;
 using System.Collections.Generic;
+using System.Reflection;
 using WavenGSI.Player;
 
 namespace WavenGSI
@@ -25,57 +27,78 @@ namespace WavenGSI
         public int MovementPoints { get; set; }
         public int SpellsCount { get; set; }
         public SpellSlots Spells { get; set; }
+        public CompanionSlots Companions { get; set; }
+        public int CompanionsCount { get; set; }
 
-        public PlayerInfos() {}
+        public PlayerInfos() { }
 
         public void Update()
         {
             if (PlayerData.initialized)
             {
                 AccountName = PlayerData.instance.nickName.Nickname;
-                HeroName = PlayerData.instance.heroCollectionData.currentPlayerHero.name;
-                Class = PlayerData.instance.heroCollectionData.currentPlayerHero.god.ToString();
-                Weapon = PlayerData.instance.heroCollectionData.currentPlayerHero.weaponDefinition.displayName.Split
-                    (
-                        PlayerData.instance.heroCollectionData.currentPlayerHero.god.ToString().ToUpper() + " - "
-                    )[1];
-                Level = PlayerData.instance.heroCollectionData.currentPlayerHero.level;
+                var currentHero = PlayerData.instance.heroCollectionData.currentPlayerHero;
+                HeroName = currentHero.name;
+                Class = currentHero.god.ToString();
+                Weapon = currentHero.weaponDefinition.displayName.Split(Class.ToUpper() + " - ")[1];
+                Level = currentHero.level;
                 if (GameStatus.isInFight)
                 {
-                    IsInFight = true;
-                    IsPlayerTurn = FightStatus.local.currentTurnPlayerId == FightStatus.local.GetLocalPlayer().id;
-                    PlayerStatus player = FightStatus.local.GetLocalPlayer();
-                    BaseHealthPoints = player.heroStatus.baseLife;
-                    HealthPoints = player.heroStatus.life;
-                    ActionPoints = player.actionPoints;
-                    ReservePoints = player.reservePoints;
-                    BaseMovementPoints = player.heroStatus.baseMovementPoints;
-                    MovementPoints = player.heroStatus.movementPoints;
-                    SpellsCount = FightStatus.local.GetLocalPlayer().m_spells.Count;
-                    Spells = new SpellSlots();
-                    var spells = new List<Spell>();
-                    foreach (var spell in FightStatus.local.GetLocalPlayer().m_spells)
+                    if (FightStatus.local != null)
                     {
-                        Spell newSpell = new Spell();
-                        newSpell.Name = spell.Value.spellDefinition.displayName.Split(" - ")[3];
-                        newSpell.Element = spell.Value.spellDefinition.details.element.ToString();
-                        newSpell.Cost = spell.Value.baseCost.Value;
-                        spells.Add(newSpell);
+                        PlayerStatus player = FightStatus.local.GetLocalPlayer();
+                        LocalPlayerHUD playerHUD = FightUI.instance.GetLocalPlayerHUD();
+                        if (player != null)
+                        {
+                            IsInFight = true;
+                            IsPlayerTurn = FightStatus.local.currentTurnPlayerId == player.id;
+                            BaseHealthPoints = player.heroStatus.baseLife;
+                            HealthPoints = player.heroStatus.life;
+                            ActionPoints = player.actionPoints;
+                            ReservePoints = player.reservePoints;
+                            BaseMovementPoints = player.heroStatus.baseMovementPoints;
+                            MovementPoints = player.heroStatus.movementPoints;
+                            Spells = new SpellSlots();
+                            PropertyInfo[] spellProperties = typeof(SpellSlots).GetProperties();
+                            int spellCount = 0;
+                            foreach (var spell in player.m_spells.Values)
+                            {
+                                if (spell.location == SpellMovementZone.Hand)
+                                {
+                                    Spell newSpell = new Spell
+                                    {
+                                        Name = spell.spellDefinition.displayName,
+                                        Element = spell.spellDefinition.details.element.ToString(),
+                                        Cost = spell.baseCost.Value,
+                                        IsAvailable = IsPlayerTurn && spell.baseCost.Value <= ActionPoints
+                                    };
+                                    spellProperties[spellCount].SetValue(Spells, newSpell);
+                                    spellCount++;
+                                }
+                            }
+                            SpellsCount = spellCount;
+                            for (; spellCount < SpellsCount; spellCount++)
+                            {
+                                spellProperties[spellCount].SetValue(Spells, null);
+                            }
+                            Companions = new CompanionSlots();
+                            CompanionsCount = player.m_availableCompanions.Count;
+                            PropertyInfo[] companionProperties = typeof(CompanionSlots).GetProperties();
+                            for (var i = 0; i < CompanionsCount; i++)
+                            {
+                                Companion newCompanion = new Companion
+                                {
+                                    Name = player.m_availableCompanions[i].definition.displayName,
+                                    Element = player.m_availableCompanions[i].definition.GetElement().Value.ToString(),
+                                    State = player.m_availableCompanions[i].state.ToString(),
+                                    Rarity = player.m_availableCompanions[i].definition.rarity.ToString()
+                                };
+                                if (IsPlayerTurn && playerHUD.GetCompanionAtIndex(i) != null)
+                                    newCompanion.IsAvailable = playerHUD.GetCompanionAtIndex(i).Value.canBeCast;
+                                companionProperties[i].SetValue(Companions, newCompanion);
+                            }
+                        }
                     }
-                    if (SpellsCount >= 1)
-                        Spells.Slot1 = spells[0];
-                    if (SpellsCount >= 2)
-                        Spells.Slot2 = spells[1];
-                    if (SpellsCount >= 3)
-                        Spells.Slot3 = spells[2];
-                    if (SpellsCount >= 4)
-                        Spells.Slot4 = spells[3];
-                    if (SpellsCount >= 5)
-                        Spells.Slot5 = spells[4];
-                    if (SpellsCount >= 6)
-                        Spells.Slot6 = spells[5];
-                    if (SpellsCount >= 7)
-                        Spells.Slot7 = spells[6];
                 }
                 else
                 {

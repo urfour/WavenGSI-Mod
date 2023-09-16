@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace WavenGSI.Player
 {
-    public class Spell
+    public class Companion
     {
         public string Name { get; set; }
         public string Element { get; set; }
-        public int Cost { get; set; }
+        public string State { get; set; }
+        public string Rarity { get; set; }
         public bool IsAvailable { get; set; }
-
-        public Spell() { }
+        public Companion() { }
     }
 }
